@@ -138,15 +138,23 @@ function App() {
         activeFilters={activeFilters}
         onRowCreation={createRowHandler}
       />
-      <div>
-        <button onClick={saveHandler}> SAVE </button>
+      <div className='buttons'>
+        <button
+          onClick={saveHandler}
+          className='save-button'
+        > SAVE </button>
         <button
           onClick={loadData}
+          className='load-button'
           disabled={localStorage.getItem('rowsData') === null || offset.current > JSON.parse(localStorage.getItem('rowsData')!).length}
         >
           LOAD MORE
         </button>
-        <button onClick={clearHandler}> CLEAR </button>
+        <button
+          className='clear-button'
+          onClick={clearHandler}>
+          CLEAR
+        </button>
       </div>
     </div>
   );

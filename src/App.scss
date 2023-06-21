@@ -4,4 +4,53 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  .buttons {
+    width: 40%;
+    margin-top: 20px;
+    padding-right: 40px;
+    display: flex;
+    justify-content: space-evenly;
+
+    button {
+      padding: 0.5rem 1.5rem;
+      border: 1px solid rgb(0, 162, 255);
+      border-radius: 4px;
+      background: rgb(0, 162, 255);
+      color: white;
+      cursor: pointer;
+      margin-right: 1rem;
+
+      &:hover,
+      :active {
+        background: rgb(24, 136, 201);
+        border-color: rgb(24, 136, 201);
+      }
+    }
+    .clear-button {
+      background: rgb(236, 37, 37);
+      border-color: rgb(236, 37, 37);
+      &:hover,
+      :active {
+        background: rgb(243, 67, 67);
+        border-color: rgb(243, 67, 67);
+      }
+    }
+    .load-button {
+      background: rgb(244, 239, 239);
+      color: rgb(24, 136, 201);
+      &:hover,
+      :active {
+        background: rgb(204, 201, 223);
+      }
+      &:disabled,
+      :hover:disabled,
+      :active:disabled {
+        background: rgb(204, 204, 204);
+        color: rgb(151, 151, 151);
+        border-color: rgb(204, 204, 204);
+        cursor: auto;
+      }
+    }
+  }
 }

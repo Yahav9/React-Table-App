@@ -1,0 +1,23 @@
+nav {
+    display: flex;
+    align-items: center;
+    padding-right: 40px;
+    margin-top: 20px;
+
+    span {
+        margin-right: 10px;
+        font-size: 18px;
+    }
+
+    label {
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+        cursor: pointer;
+        font-size: 18px;
+
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+    }
+}
