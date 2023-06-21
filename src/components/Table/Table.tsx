@@ -15,13 +15,13 @@ function Table(props: TableProps) {
         return a.ordinalNo - b.ordinalNo
     });
 
-    let initialInputValues = {};
+    let initialInputValues: Omit<RowData, 'id'> = {};
     for (const columnData of sortedColumnData) {
         initialInputValues = Object.assign(
             initialInputValues, { [columnData.id]: columnData.type === 'boolean' ? false : '' }
         )
     }
-    const [inputValues, setInputValues] = useState(initialInputValues);
+    const [inputValues, setInputValues] = useState<Omit<RowData, 'id'>>(initialInputValues);
 
     const tableHeadings = sortedColumnData.map(columnData => {
         return (
@@ -44,15 +44,12 @@ function Table(props: TableProps) {
             <td key={columnData.id} style={{ width: columnData.width }}>
                 <input
                     type={inputType}
-                    //@ts-ignore
-                    value={columnData.type !== 'boolean' && inputValues[columnData.id]}
-                    //@ts-ignore
-                    checked={columnData.type === 'boolean' && inputValues[columnData.id]}
+                    value={columnData.type !== 'boolean' ? inputValues[columnData.id] as string : undefined}
+                    checked={columnData.type === 'boolean' && inputValues[columnData.id] as boolean}
                     onChange={e => {
                         if (columnData.type !== 'boolean') {
                             setInputValues(currentData => ({ ...currentData, [columnData.id]: (e.target as HTMLInputElement).value }))
                         } else {
-                            //@ts-ignore
                             setInputValues(currentData => ({ ...currentData, [columnData.id]: !inputValues[columnData.id] }));
                         }
                     }}
