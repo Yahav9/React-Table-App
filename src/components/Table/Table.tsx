@@ -67,7 +67,9 @@ function Table(props: TableProps) {
                     key={(Math.random() * 10000000).toString()}
                     style={{ width: width }}
                 >
-                    {arr[1]!.toString()}
+                    {arr[1]!.toString() === 'true' && 'YES'}
+                    {arr[1]!.toString() === 'false' && 'NO'}
+                    {typeof arr[1] !== 'boolean' && arr[1]!.toString()}
                 </td>
             )
         })
@@ -107,7 +109,7 @@ function Table(props: TableProps) {
                 {tableDataRows}
                 <tr>
                     {tableInputs}
-                    <td>
+                    <td className='button-cell'>
                         <button
                             disabled={checkFormValidation()}
                             onClick={createRow}>
