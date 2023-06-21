@@ -6,11 +6,12 @@ import { RowData } from '../../interfaces/RowData';
 interface TableProps {
     columnsData: ColumnData[];
     rowsData: RowData[];
+    activeFilters: string[];
     onRowCreation: (rowData: RowData) => void
 }
 
 function Table(props: TableProps) {
-    const { columnsData, rowsData, onRowCreation } = props;
+    const { columnsData, rowsData, activeFilters, onRowCreation } = props;
     const sortedColumnData = columnsData.sort((a: ColumnData, b: ColumnData) => {
         return a.ordinalNo - b.ordinalNo
     });
@@ -89,8 +90,12 @@ function Table(props: TableProps) {
                 return true;
             }
         }
+        if (activeFilters.length < Object.keys(inputValues).length) {
+            return true;
+        }
         return false;
     }
+
     return (
         <table>
             <thead>

@@ -75,8 +75,8 @@ function App() {
     setFilteredRowsData([...rowsData].map(rowData => {
       const entries = Object.entries(rowData);
       const filteredEntries = entries.filter(entry => {
-        for (const activeFilter of filters) {
-          if (entry.includes(activeFilter)) {
+        for (const filter of filters) {
+          if (entry.includes(filter)) {
             return true;
           }
         }
@@ -107,6 +107,25 @@ function App() {
     setFilteredRowsData([]);
   }
 
+  const createRowHandler = (newRow: RowData) => {
+    setRowsData(rowsData => ([...rowsData, newRow]));
+    const entries = Object.entries(newRow);
+    const filteredEntries = entries.filter(entry => {
+      for (const activeFilter of activeFilters) {
+        if (entry.includes(activeFilter)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    const filteredNewRow: RowData = Object.assign(
+      { id: entries[0][1] as string },
+      Object.fromEntries(filteredEntries)
+    );
+    setFilteredRowsData(filteredRowsData => ([...filteredRowsData, filteredNewRow]));
+    setNewRows(rowsData => ([...rowsData, newRow]));
+  }
+
   return (
     <div className="App">
       <Filters
@@ -116,11 +135,8 @@ function App() {
       <Table
         columnsData={columnsData}
         rowsData={filteredRowsData}
-        onRowCreation={newRow => {
-          setRowsData(rowsData => ([...rowsData, newRow]));
-          setFilteredRowsData(rowsData => ([...rowsData, newRow]));
-          setNewRows(rowsData => ([...rowsData, newRow]));
-        }}
+        activeFilters={activeFilters}
+        onRowCreation={createRowHandler}
       />
       <button
         onClick={loadData}
