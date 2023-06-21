@@ -28,18 +28,18 @@ const tableColumns: ColumnData[] = [
 ];
 
 function App() {
-  const [rowsData, setRowsData] = useState<RowData[]>([]);
   const [filteredRowsData, setFilteredRowsData] = useState<RowData[]>([]);
   const [columnsData, setColumnsData] = useState<ColumnData[]>(tableColumns);
   const [newRows, setNewRows] = useState<RowData[]>([]);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const offset = useRef(10);
+  const rowsData = useRef<RowData[]>([])
 
   useEffect(() => {
     if (localStorage.getItem('rowsData')) {
       const fetchedData = (JSON.parse(localStorage.getItem('rowsData')!) as RowData[])
         .slice(0, 10);
-      setRowsData(fetchedData);
+      rowsData.current = fetchedData;
       setFilteredRowsData(fetchedData);
     }
   }, []);
@@ -64,7 +64,7 @@ function App() {
         );
         return filteredRowData;
       });
-      setRowsData(prevRowsData => ([...prevRowsData, ...fetchedData]));
+      rowsData.current.concat(fetchedData);
       setFilteredRowsData(prevFilteredRowsData => ([...prevFilteredRowsData, ...filteredFetchedData]));
       offset.current += 10;
     }
@@ -72,7 +72,7 @@ function App() {
 
   const filterChangeHandler = (filters: string[]) => {
     setColumnsData(tableColumns.filter(x => filters.includes(x.id)));
-    setFilteredRowsData([...rowsData].map(rowData => {
+    setFilteredRowsData(rowsData.current.map(rowData => {
       const entries = Object.entries(rowData);
       const filteredEntries = entries.filter(entry => {
         for (const filter of filters) {
@@ -103,12 +103,12 @@ function App() {
 
   const clearHandler = () => {
     localStorage.removeItem('rowsData');
-    setRowsData([]);
+    rowsData.current = [];
     setFilteredRowsData([]);
   }
 
   const createRowHandler = (newRow: RowData) => {
-    setRowsData(rowsData => ([...rowsData, newRow]));
+    rowsData.current.push(newRow);
     const entries = Object.entries(newRow);
     const filteredEntries = entries.filter(entry => {
       for (const activeFilter of activeFilters) {
