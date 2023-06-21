@@ -102,6 +102,7 @@ function Table(props: TableProps) {
                 </tr>
             </thead>
             <tbody>
+                {tableDataRows}
                 <tr>
                     {tableInputs}
                     <td>
@@ -112,7 +113,6 @@ function Table(props: TableProps) {
                         </button>
                     </td>
                 </tr>
-                {tableDataRows}
             </tbody>
         </table>
     )

@@ -32,6 +32,7 @@ function App() {
   const [filteredRowsData, setFilteredRowsData] = useState<RowData[]>([]);
   const [columnsData, setColumnsData] = useState<ColumnData[]>(tableColumns);
   const [newRows, setNewRows] = useState<RowData[]>([]);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const offset = useRef(10);
 
   useEffect(() => {
@@ -47,18 +48,34 @@ function App() {
     if (localStorage.getItem('rowsData')!.length > offset.current) {
       const fetchedData = (JSON.parse(localStorage.getItem('rowsData')!) as RowData[])
         .slice(offset.current, offset.current + 10);
+      const filteredFetchedData = fetchedData.map(rowData => {
+        const entries = Object.entries(rowData);
+        const filteredEntries = entries.filter(entry => {
+          for (const activeFilter of activeFilters) {
+            if (entry.includes(activeFilter)) {
+              return true;
+            }
+          }
+          return false;
+        });
+        const filteredRowData: RowData = Object.assign(
+          { id: entries[0][1] as string },
+          Object.fromEntries(filteredEntries)
+        );
+        return filteredRowData;
+      });
       setRowsData(prevRowsData => ([...prevRowsData, ...fetchedData]));
-      setFilteredRowsData(prevFilteredRowsData => ([...prevFilteredRowsData, ...fetchedData]));
+      setFilteredRowsData(prevFilteredRowsData => ([...prevFilteredRowsData, ...filteredFetchedData]));
       offset.current += 10;
     }
   }
 
-  const filterChangeHandler = (activeFilters: string[]) => {
-    setColumnsData(tableColumns.filter(x => activeFilters.includes(x.id)));
+  const filterChangeHandler = (filters: string[]) => {
+    setColumnsData(tableColumns.filter(x => filters.includes(x.id)));
     setFilteredRowsData([...rowsData].map(rowData => {
       const entries = Object.entries(rowData);
       const filteredEntries = entries.filter(entry => {
-        for (const activeFilter of activeFilters) {
+        for (const activeFilter of filters) {
           if (entry.includes(activeFilter)) {
             return true;
           }
@@ -71,6 +88,7 @@ function App() {
       );
       return filteredRowData;
     }))
+    setActiveFilters(filters);
   }
 
   const saveHandler = () => {
