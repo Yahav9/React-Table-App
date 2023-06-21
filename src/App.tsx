@@ -1,7 +1,7 @@
 import './App.scss';
 import { ColumnData } from './interfaces/ColumnData';
 import Table from './components/Table/Table';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { RowData } from './interfaces/RowData';
 import Filters from './components/Filters/Filters';
 
@@ -32,16 +32,26 @@ function App() {
   const [filteredRowsData, setFilteredRowsData] = useState<RowData[]>([]);
   const [columnsData, setColumnsData] = useState<ColumnData[]>(tableColumns);
   const [newRows, setNewRows] = useState<RowData[]>([]);
-  const [offset, setOffset] = useState(0);
+  const offset = useRef(10);
 
   useEffect(() => {
-    if (localStorage.getItem('rowsData') && localStorage.getItem('rowsData')!.length > offset) {
-      const newData = (JSON.parse(localStorage.getItem('rowsData')!) as RowData[])
-        .slice(offset, offset + 10);
-      setRowsData(prevRowsData => ([...prevRowsData, ...newData]));
-      setFilteredRowsData(prevFilteredRowsData => ([...prevFilteredRowsData, ...newData]));
+    if (localStorage.getItem('rowsData')) {
+      const fetchedData = (JSON.parse(localStorage.getItem('rowsData')!) as RowData[])
+        .slice(0, 10);
+      setRowsData(fetchedData);
+      setFilteredRowsData(fetchedData);
     }
-  }, [offset]);
+  }, []);
+
+  const loadData = () => {
+    if (localStorage.getItem('rowsData')!.length > offset.current) {
+      const fetchedData = (JSON.parse(localStorage.getItem('rowsData')!) as RowData[])
+        .slice(offset.current, offset.current + 10);
+      setRowsData(prevRowsData => ([...prevRowsData, ...fetchedData]));
+      setFilteredRowsData(prevFilteredRowsData => ([...prevFilteredRowsData, ...fetchedData]));
+      offset.current += 10;
+    }
+  }
 
   const filterChangeHandler = (activeFilters: string[]) => {
     setColumnsData(tableColumns.filter(x => activeFilters.includes(x.id)));
@@ -95,8 +105,8 @@ function App() {
         }}
       />
       <button
-        onClick={() => setOffset(offset + 10)}
-        disabled={localStorage.getItem('rowsData') === null || offset + 10 > JSON.parse(localStorage.getItem('rowsData')!).length}
+        onClick={loadData}
+        disabled={localStorage.getItem('rowsData') === null || offset.current > JSON.parse(localStorage.getItem('rowsData')!).length}
       >
         LOAD MORE
       </button>
