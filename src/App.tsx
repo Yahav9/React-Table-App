@@ -28,16 +28,11 @@ function App() {
       .slice(offset.current, offset.current + 10)
       .filter(row => {
         return !rowsData.current.map(rowData => rowData.id).includes(row.id);
-      })
+      });
     const filteredFetchedData = fetchedData.map(rowData => {
       const entries = Object.entries(rowData);
-      const filteredEntries = entries.filter(entry => {
-        for (const activeFilter of activeFilters.current) {
-          if (entry.includes(activeFilter)) {
-            return true;
-          }
-        }
-        return false;
+      const filteredEntries = entries.filter(([columnId]) => {
+        return activeFilters.current.includes(columnId);
       });
       const filteredRowData: RowData = Object.assign(
         { id: entries[0][1] as string },
