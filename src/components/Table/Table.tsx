@@ -81,7 +81,7 @@ function Table(props: TableProps) {
     })
 
     const createRow = () => {
-        const newRow = { id: (Math.random() * 10000000).toString(), ...inputValues }
+        const newRow = { id: (Math.random()).toString(), ...inputValues }
         onRowCreation(newRow);
         setInputValues(initialInputValues);
     }
