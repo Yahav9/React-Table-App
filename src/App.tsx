@@ -25,7 +25,10 @@ function App() {
 
   const loadData = () => {
     const fetchedData = (JSON.parse(localStorage.getItem('rowsData')!) as RowData[])
-      .slice(offset.current, offset.current + 10);
+      .slice(offset.current, offset.current + 10)
+      .filter(row => {
+        return !rowsData.current.map(rowData => rowData.id).includes(row.id);
+      })
     const filteredFetchedData = fetchedData.map(rowData => {
       const entries = Object.entries(rowData);
       const filteredEntries = entries.filter(entry => {
@@ -43,7 +46,6 @@ function App() {
       return filteredRowData;
     });
     rowsData.current = rowsData.current.concat(fetchedData);
-    console.log(rowsData.current.concat(fetchedData))
     setFilteredRowsData(prevFilteredRowsData => ([...prevFilteredRowsData, ...filteredFetchedData]));
     offset.current += 10;
   }
@@ -76,7 +78,6 @@ function App() {
         (JSON.parse(localStorage.getItem('rowsData')!) || []).concat(newRows.current)
       )
     );
-    window.location.reload();
   }
 
   const clearHandler = () => {
