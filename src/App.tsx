@@ -4,28 +4,7 @@ import Table from './components/Table/Table';
 import { useEffect, useState, useRef } from 'react';
 import { RowData } from './interfaces/RowData';
 import Filters from './components/Filters/Filters';
-
-const tableColumns: ColumnData[] = [
-  {
-    id: 'name',
-    ordinalNo: 0,
-    title: 'Name',
-    type: 'string',
-    width: 70
-  },
-  {
-    id: 'age',
-    ordinalNo: 1,
-    title: 'Age',
-    type: 'number'
-  },
-  {
-    id: 'isAllergicToPeanuts',
-    ordinalNo: 2,
-    title: 'Allergic to Peanuts?',
-    type: 'boolean'
-  }
-];
+import tableColumns from './data/tableColumns';
 
 function App() {
   const [filteredRowsData, setFilteredRowsData] = useState<RowData[]>([]);
@@ -45,29 +24,28 @@ function App() {
   }, []);
 
   const loadData = () => {
-    if (localStorage.getItem('rowsData')!.length > offset.current) {
-      const fetchedData = (JSON.parse(localStorage.getItem('rowsData')!) as RowData[])
-        .slice(offset.current, offset.current + 10);
-      const filteredFetchedData = fetchedData.map(rowData => {
-        const entries = Object.entries(rowData);
-        const filteredEntries = entries.filter(entry => {
-          for (const activeFilter of activeFilters.current) {
-            if (entry.includes(activeFilter)) {
-              return true;
-            }
+    const fetchedData = (JSON.parse(localStorage.getItem('rowsData')!) as RowData[])
+      .slice(offset.current, offset.current + 10);
+    const filteredFetchedData = fetchedData.map(rowData => {
+      const entries = Object.entries(rowData);
+      const filteredEntries = entries.filter(entry => {
+        for (const activeFilter of activeFilters.current) {
+          if (entry.includes(activeFilter)) {
+            return true;
           }
-          return false;
-        });
-        const filteredRowData: RowData = Object.assign(
-          { id: entries[0][1] as string },
-          Object.fromEntries(filteredEntries)
-        );
-        return filteredRowData;
+        }
+        return false;
       });
-      rowsData.current.concat(fetchedData);
-      setFilteredRowsData(prevFilteredRowsData => ([...prevFilteredRowsData, ...filteredFetchedData]));
-      offset.current += 10;
-    }
+      const filteredRowData: RowData = Object.assign(
+        { id: entries[0][1] as string },
+        Object.fromEntries(filteredEntries)
+      );
+      return filteredRowData;
+    });
+    rowsData.current = rowsData.current.concat(fetchedData);
+    console.log(rowsData.current.concat(fetchedData))
+    setFilteredRowsData(prevFilteredRowsData => ([...prevFilteredRowsData, ...filteredFetchedData]));
+    offset.current += 10;
   }
 
   const filterChangeHandler = (filters: string[]) => {
