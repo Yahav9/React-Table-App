@@ -60,16 +60,16 @@ function Table(props: TableProps) {
     });
 
     const tableDataRows = rowsData.map(rowData => {
-        const cells = Object.entries(rowData).slice(1).map(arr => {
-            const width = columnsData.find(x => x.id === arr[0])?.width;
+        const cells = Object.entries(rowData).slice(1).map(([columnId, value]) => {
+            const width = columnsData.find(x => x.id === columnId)?.width;
             return (
                 <td
-                    key={(Math.random() * 10000000).toString()}
+                    key={columnId}
                     style={{ width: width }}
                 >
-                    {arr[1]!.toString() === 'true' && 'YES'}
-                    {arr[1]!.toString() === 'false' && 'NO'}
-                    {typeof arr[1] !== 'boolean' && arr[1]!.toString()}
+                    {value!.toString() === 'true' && 'YES'}
+                    {value!.toString() === 'false' && 'NO'}
+                    {typeof value !== 'boolean' && value!.toString()}
                 </td>
             )
         })
