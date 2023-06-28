@@ -30,7 +30,7 @@ const tableColumns: ColumnData[] = [
 function App() {
   const [filteredRowsData, setFilteredRowsData] = useState<RowData[]>([]);
   const [columnsData, setColumnsData] = useState<ColumnData[]>(tableColumns);
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const activeFilters = useRef<string[]>(columnsData.map(columnData => columnData.id));
   const newRows = useRef<RowData[]>([]);
   const offset = useRef(10);
   const rowsData = useRef<RowData[]>([])
@@ -51,7 +51,7 @@ function App() {
       const filteredFetchedData = fetchedData.map(rowData => {
         const entries = Object.entries(rowData);
         const filteredEntries = entries.filter(entry => {
-          for (const activeFilter of activeFilters) {
+          for (const activeFilter of activeFilters.current) {
             if (entry.includes(activeFilter)) {
               return true;
             }
@@ -88,7 +88,7 @@ function App() {
       );
       return filteredRowData;
     }))
-    setActiveFilters(filters);
+    activeFilters.current = filters;
   }
 
   const saveHandler = () => {
@@ -110,20 +110,7 @@ function App() {
 
   const createRowHandler = (newRow: RowData) => {
     rowsData.current.push(newRow);
-    const entries = Object.entries(newRow);
-    const filteredEntries = entries.filter(entry => {
-      for (const activeFilter of activeFilters) {
-        if (entry.includes(activeFilter)) {
-          return true;
-        }
-      }
-      return false;
-    });
-    const filteredNewRow: RowData = Object.assign(
-      { id: entries[0][1] as string },
-      Object.fromEntries(filteredEntries)
-    );
-    setFilteredRowsData(filteredRowsData => ([...filteredRowsData, filteredNewRow]));
+    setFilteredRowsData(rowsData.current);
     newRows.current.push(newRow);
   }
 
@@ -136,7 +123,7 @@ function App() {
       <Table
         columnsData={columnsData}
         rowsData={filteredRowsData}
-        activeFilters={activeFilters}
+        activeFilters={activeFilters.current}
         onRowCreation={createRowHandler}
       />
       <div className='buttons'>
