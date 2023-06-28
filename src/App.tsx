@@ -30,8 +30,8 @@ const tableColumns: ColumnData[] = [
 function App() {
   const [filteredRowsData, setFilteredRowsData] = useState<RowData[]>([]);
   const [columnsData, setColumnsData] = useState<ColumnData[]>(tableColumns);
-  const [newRows, setNewRows] = useState<RowData[]>([]);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const newRows = useRef<RowData[]>([]);
   const offset = useRef(10);
   const rowsData = useRef<RowData[]>([])
 
@@ -95,7 +95,7 @@ function App() {
     localStorage.setItem(
       'rowsData',
       JSON.stringify(
-        (JSON.parse(localStorage.getItem('rowsData')!) || []).concat(newRows)
+        (JSON.parse(localStorage.getItem('rowsData')!) || []).concat(newRows.current)
       )
     );
     window.location.reload();
@@ -104,6 +104,7 @@ function App() {
   const clearHandler = () => {
     localStorage.removeItem('rowsData');
     rowsData.current = [];
+    newRows.current = [];
     setFilteredRowsData([]);
   }
 
@@ -123,7 +124,7 @@ function App() {
       Object.fromEntries(filteredEntries)
     );
     setFilteredRowsData(filteredRowsData => ([...filteredRowsData, filteredNewRow]));
-    setNewRows(rowsData => ([...rowsData, newRow]));
+    newRows.current.push(newRow);
   }
 
   return (
