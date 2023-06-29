@@ -53,6 +53,15 @@ table {
                 cursor: auto;
             }
         }
+        .delete-button {
+            background: rgb(236, 37, 37);
+            border-color: rgb(236, 37, 37);
+            &:hover,
+            :active {
+                background: rgb(243, 67, 67);
+                border-color: rgb(243, 67, 67);
+            }
+        }
     }
 
     thead {

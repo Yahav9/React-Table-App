@@ -3,6 +3,7 @@ import { ColumnData } from '../../interfaces/ColumnData';
 import './Table.scss';
 import { RowData } from '../../interfaces/RowData';
 import Cell from '../Cell/Cell';
+import Row from '../Row/Row';
 
 interface TableProps {
     columnsData: ColumnData[];
@@ -14,9 +15,8 @@ interface TableProps {
 
 function Table(props: TableProps) {
     const { columnsData, rowsData, activeFilters, onRowCreation, updateCell } = props;
-    const sortedColumnData = columnsData.sort((a: ColumnData, b: ColumnData) => {
-        return a.ordinalNo - b.ordinalNo
-    });
+    const sortedColumnData = columnsData
+        .sort((a: ColumnData, b: ColumnData) => a.ordinalNo - b.ordinalNo);
     const initialInputValues = Object.fromEntries(
         sortedColumnData.map((columnData) => [columnData.id, columnData.type === 'boolean' ? false : ''])
     );
@@ -92,11 +92,7 @@ function Table(props: TableProps) {
                 width={columnsData.find(x => x.id === columnId)!.width}
             />
         })
-        return (
-            <tr key={rowData.id}>
-                {cells}
-            </tr>
-        )
+        return <Row key={rowData.id}>{cells}</Row>
     });
 
     return (
