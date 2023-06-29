@@ -7,7 +7,7 @@ interface TableProps {
     columnsData: ColumnData[];
     rowsData: RowData[];
     activeFilters: string[];
-    onRowCreation: (rowData: RowData) => void
+    onRowCreation: (rowData: RowData) => void;
 }
 
 function Table(props: TableProps) {
@@ -15,13 +15,9 @@ function Table(props: TableProps) {
     const sortedColumnData = columnsData.sort((a: ColumnData, b: ColumnData) => {
         return a.ordinalNo - b.ordinalNo
     });
-
-    let initialInputValues: Omit<RowData, 'id'> = {};
-    for (const columnData of sortedColumnData) {
-        initialInputValues = Object.assign(
-            initialInputValues, { [columnData.id]: columnData.type === 'boolean' ? false : '' }
-        )
-    }
+    const initialInputValues = Object.fromEntries(
+        sortedColumnData.map((columnData) => [columnData.id, columnData.type === 'boolean' ? false : ''])
+    );
     const [inputValues, setInputValues] = useState<Omit<RowData, 'id'>>(initialInputValues);
 
     const tableHeadings = sortedColumnData.map(columnData => {
@@ -60,12 +56,15 @@ function Table(props: TableProps) {
     });
 
     const tableDataRows = rowsData.map(rowData => {
-        const cells = Object.entries(rowData).slice(1).map(([columnId, value]) => {
+        const cells = Object.entries(rowData).map(([columnId, value]) => {
+            if (columnId === 'id') {
+                return null;
+            }
             const width = columnsData.find(x => x.id === columnId)?.width;
             return (
                 <td
                     key={columnId}
-                    style={{ width: width }}
+                    style={{ width }}
                 >
                     {value!.toString() === 'true' && 'YES'}
                     {value!.toString() === 'false' && 'NO'}
