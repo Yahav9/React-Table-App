@@ -11,6 +11,7 @@ function App() {
   const [columnsData, setColumnsData] = useState<ColumnData[]>(tableColumns);
   const activeFilters = useRef<string[]>(columnsData.map(columnData => columnData.id));
   const newRows = useRef<RowData[]>([]);
+  const updatedRows = useRef<RowData[]>([]);
   const offset = useRef(10);
   const rowsData = useRef<RowData[]>([])
 
@@ -66,12 +67,33 @@ function App() {
     activeFilters.current = filters;
   }
 
+  const updateCell = (updatedCell: { rowId: string; columnId: string; value: unknown }) => {
+    if (!updatedRows.current.map(({ id }) => id).includes(updatedCell.rowId)) {
+      updatedRows.current.push({ id: updatedCell.rowId, [updatedCell.columnId]: updatedCell.value })
+    } else {
+      updatedRows.current.find(({ id }) => updatedCell.rowId === id)![updatedCell.columnId] = updatedCell.value;
+    }
+    console.log(updatedRows.current);
+  }
+
+  const createRowHandler = (newRow: RowData) => {
+    rowsData.current.push(newRow);
+    setFilteredRowsData(rowsData.current);
+    newRows.current.push(newRow);
+  }
+
   const saveHandler = () => {
+    const storedRowsData = JSON.parse(localStorage.getItem('rowsData')!) as RowData[];
+    for (const updatedRow of updatedRows.current) {
+      const index = storedRowsData.findIndex(({ id }) => updatedRow.id === id);
+      storedRowsData[index] = Object.assign(
+        storedRowsData.find(({ id }) => updatedRow.id === id)!,
+        updatedRow
+      );
+    }
     localStorage.setItem(
       'rowsData',
-      JSON.stringify(
-        (JSON.parse(localStorage.getItem('rowsData')!) || []).concat(newRows.current)
-      )
+      JSON.stringify(storedRowsData.concat(newRows.current))
     );
   }
 
@@ -80,12 +102,6 @@ function App() {
     rowsData.current = [];
     newRows.current = [];
     setFilteredRowsData([]);
-  }
-
-  const createRowHandler = (newRow: RowData) => {
-    rowsData.current.push(newRow);
-    setFilteredRowsData(rowsData.current);
-    newRows.current.push(newRow);
   }
 
   return (
@@ -99,6 +115,7 @@ function App() {
         rowsData={filteredRowsData}
         activeFilters={activeFilters.current}
         onRowCreation={createRowHandler}
+        updateCell={updateCell}
       />
       <div className='buttons'>
         <button

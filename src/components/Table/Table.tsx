@@ -2,16 +2,18 @@ import { useState } from 'react';
 import { ColumnData } from '../../interfaces/ColumnData';
 import './Table.scss';
 import { RowData } from '../../interfaces/RowData';
+import Cell from '../Cell/Cell';
 
 interface TableProps {
     columnsData: ColumnData[];
     rowsData: RowData[];
     activeFilters: string[];
     onRowCreation: (rowData: RowData) => void;
+    updateCell: (updatedCell: { columnId: string; rowId: string; value: unknown }) => void;
 }
 
 function Table(props: TableProps) {
-    const { columnsData, rowsData, activeFilters, onRowCreation } = props;
+    const { columnsData, rowsData, activeFilters, onRowCreation, updateCell } = props;
     const sortedColumnData = columnsData.sort((a: ColumnData, b: ColumnData) => {
         return a.ordinalNo - b.ordinalNo
     });
@@ -19,6 +21,34 @@ function Table(props: TableProps) {
         sortedColumnData.map((columnData) => [columnData.id, columnData.type === 'boolean' ? false : ''])
     );
     const [inputValues, setInputValues] = useState<Omit<RowData, 'id'>>(initialInputValues);
+
+    const createRow = () => {
+        const newRow = { id: (Math.random()).toString(), ...inputValues }
+        onRowCreation(newRow);
+        setInputValues(initialInputValues);
+    }
+
+    const checkFormValidation = () => {
+        for (const value of Object.values(inputValues)) {
+            if (value!.toString() === '') {
+                return true;
+            }
+        }
+        if (activeFilters.length < Object.keys(inputValues).length) {
+            return true;
+        }
+        return false;
+    }
+
+    const convertTypeToInputType = (type: string) => {
+        if (type === 'string') {
+            return 'text';
+        } else if (type === 'boolean') {
+            return 'checkbox';
+        } else {
+            return type;
+        }
+    }
 
     const tableHeadings = sortedColumnData.map(columnData => {
         return (
@@ -29,18 +59,10 @@ function Table(props: TableProps) {
     });
 
     const tableInputs = sortedColumnData.map(columnData => {
-        let inputType: string;
-        if (columnData.type === 'string') {
-            inputType = 'text';
-        } else if (columnData.type === 'boolean') {
-            inputType = 'checkbox';
-        } else {
-            inputType = columnData.type;
-        }
         return (
             <td key={columnData.id} style={{ width: columnData.width }}>
                 <input
-                    type={inputType}
+                    type={convertTypeToInputType(columnData.type)}
                     value={columnData.type !== 'boolean' ? inputValues[columnData.id] as string : undefined}
                     checked={columnData.type === 'boolean' && inputValues[columnData.id] as boolean}
                     onChange={e => {
@@ -60,42 +82,22 @@ function Table(props: TableProps) {
             if (columnId === 'id') {
                 return null;
             }
-            const width = columnsData.find(x => x.id === columnId)?.width;
-            return (
-                <td
-                    key={columnId}
-                    style={{ width }}
-                >
-                    {value!.toString() === 'true' && 'YES'}
-                    {value!.toString() === 'false' && 'NO'}
-                    {typeof value !== 'boolean' && value!.toString()}
-                </td>
-            )
+            return <Cell
+                key={columnId}
+                id={columnId}
+                value={value}
+                type={convertTypeToInputType(columnsData.find(x => x.id === columnId)!.type)}
+                onInputBlur={updateCell}
+                rowId={rowData.id}
+                width={columnsData.find(x => x.id === columnId)!.width}
+            />
         })
         return (
             <tr key={rowData.id}>
                 {cells}
             </tr>
         )
-    })
-
-    const createRow = () => {
-        const newRow = { id: (Math.random()).toString(), ...inputValues }
-        onRowCreation(newRow);
-        setInputValues(initialInputValues);
-    }
-
-    const checkFormValidation = () => {
-        for (const value of Object.values(inputValues)) {
-            if (value!.toString() === '') {
-                return true;
-            }
-        }
-        if (activeFilters.length < Object.keys(inputValues).length) {
-            return true;
-        }
-        return false;
-    }
+    });
 
     return (
         <table>
