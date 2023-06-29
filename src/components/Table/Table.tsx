@@ -11,10 +11,11 @@ interface TableProps {
     activeFilters: string[];
     onRowCreation: (rowData: RowData) => void;
     updateCell: (updatedCell: { columnId: string; rowId: string; value: unknown }) => void;
+    onRowDelete: (rowID: string) => void;
 }
 
 function Table(props: TableProps) {
-    const { columnsData, rowsData, activeFilters, onRowCreation, updateCell } = props;
+    const { columnsData, rowsData, activeFilters, onRowCreation, updateCell, onRowDelete } = props;
     const sortedColumnData = columnsData
         .sort((a: ColumnData, b: ColumnData) => a.ordinalNo - b.ordinalNo);
     const initialInputValues = Object.fromEntries(
@@ -92,7 +93,13 @@ function Table(props: TableProps) {
                 width={columnsData.find(x => x.id === columnId)!.width}
             />
         })
-        return <Row key={rowData.id}>{cells}</Row>
+        return <Row
+            key={rowData.id}
+            id={rowData.id}
+            onDelete={onRowDelete}
+        >
+            {cells}
+        </Row>
     });
 
     return (

@@ -12,8 +12,9 @@ function App() {
   const activeFilters = useRef<string[]>(columnsData.map(columnData => columnData.id));
   const newRows = useRef<RowData[]>([]);
   const updatedRows = useRef<RowData[]>([]);
+  const deletedRowsIds = useRef<string[]>([]);
   const offset = useRef(10);
-  const rowsData = useRef<RowData[]>([])
+  const rowsData = useRef<RowData[]>([]);
 
   useEffect(() => {
     if (localStorage.getItem('rowsData')) {
@@ -82,6 +83,12 @@ function App() {
     newRows.current.push(newRow);
   }
 
+  const rowDeleteHandler = (rowId: string) => {
+    setFilteredRowsData(prevFilteredRowsData => [...prevFilteredRowsData]
+      .filter(({ id }) => id !== rowId));
+    deletedRowsIds.current.push(rowId);
+  }
+
   const saveHandler = () => {
     const storedRowsData = JSON.parse(localStorage.getItem('rowsData')!) as RowData[];
     for (const updatedRow of updatedRows.current) {
@@ -93,8 +100,15 @@ function App() {
     }
     localStorage.setItem(
       'rowsData',
-      JSON.stringify(storedRowsData.concat(newRows.current))
+      JSON.stringify(
+        storedRowsData
+          .filter(({ id }) => !deletedRowsIds.current.includes(id))
+          .concat(newRows.current)
+      )
     );
+    newRows.current = [];
+    updatedRows.current = [];
+    deletedRowsIds.current = [];
   }
 
   const clearHandler = () => {
@@ -116,6 +130,7 @@ function App() {
         activeFilters={activeFilters.current}
         onRowCreation={createRowHandler}
         updateCell={updateCell}
+        onRowDelete={rowDeleteHandler}
       />
       <div className='buttons'>
         <button
