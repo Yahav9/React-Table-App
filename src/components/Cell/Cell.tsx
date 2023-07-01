@@ -1,4 +1,5 @@
 import { useState } from "react";
+import './Cell.scss';
 
 interface CellProps {
     id: string;

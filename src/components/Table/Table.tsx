@@ -12,10 +12,19 @@ interface TableProps {
     onRowCreation: (rowData: RowData) => void;
     updateCell: (updatedCell: { columnId: string; rowId: string; value: unknown }) => void;
     onRowDelete: (rowID: string) => void;
+    sortRows: (columnId: string, order: string) => void;
 }
 
 function Table(props: TableProps) {
-    const { columnsData, rowsData, activeFilters, onRowCreation, updateCell, onRowDelete } = props;
+    const {
+        columnsData,
+        rowsData,
+        activeFilters,
+        onRowCreation,
+        updateCell,
+        onRowDelete,
+        sortRows
+    } = props;
     const sortedColumnData = columnsData
         .sort((a: ColumnData, b: ColumnData) => a.ordinalNo - b.ordinalNo);
     const initialInputValues = Object.fromEntries(
@@ -54,7 +63,21 @@ function Table(props: TableProps) {
     const tableHeadings = sortedColumnData.map(columnData => {
         return (
             <th key={columnData.id} style={{ width: columnData.width }}>
-                {columnData.title}
+                <span>{columnData.title}</span>
+                <div>
+                    <i
+                        className="material-icons"
+                        onClick={() => sortRows(columnData.id, 'ascend')}
+                    >
+                        arrow_drop_up
+                    </i>
+                    <i
+                        className="material-icons"
+                        onClick={() => sortRows(columnData.id, 'descend')}
+                    >
+                        arrow_drop_down
+                    </i>
+                </div>
             </th>
         )
     });
@@ -64,13 +87,15 @@ function Table(props: TableProps) {
             <td key={columnData.id} style={{ width: columnData.width }}>
                 <input
                     type={convertTypeToInputType(columnData.type)}
-                    value={columnData.type !== 'boolean' ? inputValues[columnData.id] as string : undefined}
+                    value={columnData.type !== 'boolean' ? inputValues[columnData.id]?.toString() : undefined}
                     checked={columnData.type === 'boolean' && inputValues[columnData.id] as boolean}
                     onChange={e => {
-                        if (columnData.type !== 'boolean') {
-                            setInputValues(currentData => ({ ...currentData, [columnData.id]: (e.target as HTMLInputElement).value }))
-                        } else {
+                        if (columnData.type === 'boolean') {
                             setInputValues(currentData => ({ ...currentData, [columnData.id]: !inputValues[columnData.id] }));
+                        } else if (columnData.type === 'number') {
+                            setInputValues(currentData => ({ ...currentData, [columnData.id]: Number(e.target.value) }))
+                        } else {
+                            setInputValues(currentData => ({ ...currentData, [columnData.id]: e.target.value }))
                         }
                     }}
                 />

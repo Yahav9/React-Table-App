@@ -68,54 +68,79 @@ function App() {
     activeFilters.current = filters;
   }
 
-  const updateCell = (updatedCell: { rowId: string; columnId: string; value: unknown }) => {
-    if (!updatedRows.current.map(({ id }) => id).includes(updatedCell.rowId)) {
-      updatedRows.current.push({ id: updatedCell.rowId, [updatedCell.columnId]: updatedCell.value })
-    } else {
-      updatedRows.current.find(({ id }) => updatedCell.rowId === id)![updatedCell.columnId] = updatedCell.value;
-    }
-    console.log(updatedRows.current);
-  }
-
   const createRowHandler = (newRow: RowData) => {
     rowsData.current.push(newRow);
     setFilteredRowsData(rowsData.current);
     newRows.current.push(newRow);
   }
 
+  const updateCell = (updatedCell: { rowId: string; columnId: string; value: unknown }) => {
+    const unsavedRow = newRows.current.find(({ id }) => id === updatedCell.rowId);
+    const updatedRow = updatedRows.current.find(({ id }) => updatedCell.rowId === id);
+    if (unsavedRow) {
+      unsavedRow[updatedCell.columnId] = updatedCell.value;
+    } else if (updatedRow) {
+      updatedRow[updatedCell.columnId] = updatedCell.value;
+    } else {
+      updatedRows.current.push({ id: updatedCell.rowId, [updatedCell.columnId]: updatedCell.value });
+    }
+  }
+
   const rowDeleteHandler = (rowId: string) => {
     setFilteredRowsData(prevFilteredRowsData => [...prevFilteredRowsData]
       .filter(({ id }) => id !== rowId));
-    deletedRowsIds.current.push(rowId);
+    const indexOfUnsavedRow = newRows.current.findIndex(({ id }) => id === rowId);
+    if (indexOfUnsavedRow >= 0) {
+      newRows.current.splice(indexOfUnsavedRow, 1);
+    } else {
+      deletedRowsIds.current.push(rowId);
+    }
   }
 
   const saveHandler = () => {
-    const storedRowsData = JSON.parse(localStorage.getItem('rowsData')!) as RowData[];
-    for (const updatedRow of updatedRows.current) {
-      const index = storedRowsData.findIndex(({ id }) => updatedRow.id === id);
-      storedRowsData[index] = Object.assign(
-        storedRowsData.find(({ id }) => updatedRow.id === id)!,
-        updatedRow
+    if (!localStorage.getItem('rowsData')) {
+      localStorage.setItem('rowsData', JSON.stringify(newRows.current));
+      newRows.current = [];
+    } else {
+      const storedRowsData = JSON.parse(localStorage.getItem('rowsData')!) as RowData[];
+      for (const updatedRow of updatedRows.current) {
+        const index = storedRowsData.findIndex(({ id }) => updatedRow.id === id);
+        storedRowsData[index] = Object.assign(
+          storedRowsData.find(({ id }) => updatedRow.id === id)!,
+          updatedRow
+        );
+      }
+      localStorage.setItem(
+        'rowsData',
+        JSON.stringify(
+          storedRowsData
+            .filter(({ id }) => !deletedRowsIds.current.includes(id))
+            .concat(newRows.current)
+        )
       );
+      newRows.current = [];
+      updatedRows.current = [];
+      deletedRowsIds.current = [];
     }
-    localStorage.setItem(
-      'rowsData',
-      JSON.stringify(
-        storedRowsData
-          .filter(({ id }) => !deletedRowsIds.current.includes(id))
-          .concat(newRows.current)
-      )
-    );
-    newRows.current = [];
-    updatedRows.current = [];
-    deletedRowsIds.current = [];
   }
 
   const clearHandler = () => {
     localStorage.removeItem('rowsData');
     rowsData.current = [];
     newRows.current = [];
+    updatedRows.current = [];
+    deletedRowsIds.current = [];
     setFilteredRowsData([]);
+  }
+
+  const sortTableRows = (columnId: string, order: string) => {
+    if (order === 'ascend') {
+      setFilteredRowsData(prevData => [...prevData]
+        .sort((a, b) => (a[columnId] as string | number | boolean) > (b[columnId] as string | number | boolean) ? 1 : -1));
+    } else if (order === 'descend') {
+      setFilteredRowsData(prevData => [...prevData]
+        .sort((a, b) => (a[columnId] as string | number | boolean) < (b[columnId] as string | number | boolean) ? 1 : -1));
+    }
   }
 
   return (
@@ -131,6 +156,7 @@ function App() {
         onRowCreation={createRowHandler}
         updateCell={updateCell}
         onRowDelete={rowDeleteHandler}
+        sortRows={sortTableRows}
       />
       <div className='buttons'>
         <button

@@ -20,11 +20,18 @@ table {
         }
     }
 
-    th,
-    td {
+    th {
         padding: 10px;
         border: 1px solid rgb(204, 204, 204);
         text-align: center;
+        div {
+            margin-left: 15px;
+            display: inline-flex;
+            flex-direction: column;
+            .material-icons {
+                cursor: pointer;
+            }
+        }
     }
 
     .button-cell {
