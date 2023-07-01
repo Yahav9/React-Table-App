@@ -90,6 +90,10 @@ function App() {
     setFilteredRowsData(prevFilteredRowsData => [...prevFilteredRowsData]
       .filter(({ id }) => id !== rowId));
     const indexOfUnsavedRow = newRows.current.findIndex(({ id }) => id === rowId);
+    const indexOfUpdatedRow = updatedRows.current.findIndex(({ id }) => id === rowId);
+    if (indexOfUpdatedRow >= 0) {
+      updatedRows.current.splice(indexOfUpdatedRow, 1);
+    }
     if (indexOfUnsavedRow >= 0) {
       newRows.current.splice(indexOfUnsavedRow, 1);
     } else {
